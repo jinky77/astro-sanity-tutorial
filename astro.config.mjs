@@ -1,16 +1,13 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
-
 import sanity from "@sanity/astro";
 import react from "@astrojs/react";
-
 import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-
   integrations: [
     sanity({
       projectId: "kzn3z33b",
@@ -21,10 +18,9 @@ export default defineConfig({
     }),
     react(),
   ],
-
   optimizeDeps: {
     exclude: ["react-compiler-runtime", "lodash/startCase.js"],
   },
-
-  adapter: cloudflare({ imageService: "compile" }),
+  adapter: cloudflare(),
+  output: "server",
 });
