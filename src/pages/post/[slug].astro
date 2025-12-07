@@ -1,0 +1,61 @@
+---
+import type { SanityDocument } from "@sanity/client";
+import { loadQuery } from "../../sanity/lib/load-query";
+import Layout from "../../layouts/Layout.astro";
+import PortableText from "../../components/PortableText.astro";
+import "../../styles/global.css";
+
+export async function getStaticPaths() {
+  const { data: posts } = await loadQuery<SanityDocument[]>({
+    query: `*[_type == "post"]`,
+  });
+
+  return posts.map(({ slug }) => {
+    return {
+      params: {
+        slug: slug.current,
+      },
+    };
+  });
+}
+
+const { params } = Astro;
+
+const { data: post } = await loadQuery<{
+  title: string;
+  publishedAt: Date;
+  categories: Array<{
+    title: string;
+    description: string;
+  }>;
+  body: any[];
+}>({
+  query: `*[_type == "post" && slug.current == $slug][0] {
+    title,
+    publishedAt,
+    "categories": categories[]->{
+      title,
+      description
+    },
+    body
+  }`,
+  params,
+});
+---
+
+<Layout>
+  <h1 class="text-3xl font-semibold">A post about {post.title}</h1>
+  <p class="text-amber-400">
+    This post has been published at {post.publishedAt}
+  </p>
+  {
+    post.categories && (
+      <ul>
+        {post.categories.map((category) => (
+          <li>{category.title}</li>
+        ))}
+      </ul>
+    )
+  }
+  <PortableText portableText={post.body} />
+</Layout>
